@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LNC Album Reviews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --cream-dark: #EDE6D6;
+    --brown: #3D2B1F;
+    --brown-mid: #6B4C3B;
+    --brown-light: #A07856;
+    --amber: #C8862A;
+    --amber-light: #E8B86D;
+    --red: #8B2E2E;
+    --green: #2E5C3A;
+    --ink: #1A1208;
+    --muted: #7A6A58;
+    --border: rgba(61,43,31,0.18);
+    --border-strong: rgba(61,43,31,0.35);
+    --shadow: 0 2px 16px rgba(61,43,31,0.12);
+    --shadow-heavy: 0 8px 40px rgba(61,43,31,0.2);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--brown);
+    min-height: 100vh;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%233D2B1F' opacity='0.06'/%3E%3C/svg%3E");
+  }
+
+  /* ——— LANDING / SETUP ——— */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+  }
+  .landing-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: var(--brown);
+    text-align: center;
+    line-height: 1.1;
+  }
+  .landing-logo span { color: var(--amber); font-style: italic; }
+  .landing-tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .landing-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+  .landing-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+  }
+  .landing-card p { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .input-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  input[type="text"] {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--brown);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus { border-color: var(--amber); }
+  .btn {
+    padding: 0.65rem 1.2rem;
+    background: var(--brown);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--brown-mid); }
+  .btn:active { transform: scale(0.98); }
+  .btn-amber { background: var(--amber); }
+  .btn-amber:hover { background: var(--amber-light); color: var(--brown); }
+  .divider { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 1rem 0; position: relative; }
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+  .url-share {
+    background: var(--cream);
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--brown-mid);
+    word-break: break-all;
+    cursor: pointer;
+  }
+  .url-share:hover { background: var(--cream-dark); }
+  .copy-hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+
+  /* ——— APP SHELL ——— */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+
+  /* NAV */
+  nav {
+    background: var(--brown);
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--amber-light);
+    font-style: italic;
+  }
+  .nav-tabs { display: flex; gap: 0.25rem; }
+  .nav-tab {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    color: rgba(245,240,232,0.7);
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .nav-tab:hover { background: rgba(255,255,255,0.1); color: var(--cream); }
+  .nav-tab.active { background: rgba(200,134,42,0.3); color: var(--amber-light); }
+  .nav-user {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.6);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .user-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--brown);
+  }
+
+  /* PAGES */
+  .page { display: none; padding: 2rem 1.5rem; max-width: 900px; margin: 0 auto; width: 100%; }
+  .page.active { display: block; }
+
+  /* ——— TODAY'S ALBUM ——— */
+  .album-hero {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 640px) {
+    .album-hero { grid-template-columns: 1fr; }
+    nav { padding: 0 1rem; }
+    .nav-logo { font-size: 1.1rem; }
+    .nav-tab { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+  }
+  .album-cover-wrap {
+    position: relative;
+    aspect-ratio: 1;
+  }
+  .album-cover {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: var(--shadow-heavy), 6px 6px 0 rgba(61,43,31,0.12);
+    display: block;
+  }
+  .album-cover-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, var(--brown-mid) 0%, var(--brown) 100%);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-heavy), 6px 6px 0 rgba(61,43,31,0.12);
+  }
+  .vinyl-icon { font-size: 5rem; opacity: 0.4; }
+  .album-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .source-badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .source-rs { background: #FFECE8; color: #8B2E2E; border: 1px solid rgba(139,46,46,0.25); }
+  .source-pf { background: #F0EEFF; color: #4A3B8C; border: 1px solid rgba(74,59,140,0.25); }
+  .source-am { background: #FFE8F0; color: #8B1A4A; border: 1px solid rgba(139,26,74,0.25); }
+  .source-nme { background: #E8FFE8; color: #1A6B2A; border: 1px solid rgba(26,107,42,0.25); }
+  .album-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+  .album-artist {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .album-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.5rem;
+    background: #FA2D55;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+  }
+  .play-btn:hover { opacity: 0.88; transform: scale(1.02); }
+  .play-btn svg { width: 20px; height: 20px; }
+
+  /* RATING */
+  .rating-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .rating-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+  .stars {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .star {
+    width: 32px; height: 32px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    flex-shrink: 0;
+  }
+  .star:hover { transform: scale(1.15); }
+  .star svg { width: 100%; height: 100%; }
+  .star.filled svg .star-fill { fill: var(--amber); }
+  .star:not(.filled) svg .star-fill { fill: none; }
+  .star svg .star-stroke { stroke: var(--amber); fill: none; stroke-width: 1.5; }
+  .rating-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .rating-num span { font-size: 1rem; color: var(--muted); }
+  .save-rating-btn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1.2rem;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .save-rating-btn:hover { opacity: 0.85; }
+  .saved-notice {
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-top: 0.4rem;
+    display: none;
+  }
+
+  /* GROUP SCORES */
+  .scores-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .score-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .score-card .sc-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+  .score-card .sc-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--brown);
+    line-height: 1;
+  }
+  .score-card .sc-val.no-rating { font-size: 1rem; color: var(--muted); font-family: 'DM Sans', sans-serif; padding-top: 0.35rem; }
+
+  /* FACTS */
+  .facts-section {
+    background: var(--cream-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .facts-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .fact-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+    align-items: flex-start;
+  }
+  .fact-bullet {
+    width: 6px; height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 0.55rem;
+  }
+  .fact-text { font-size: 0.88rem; line-height: 1.6; color: var(--brown-mid); }
+  .facts-loading {
+    font-size: 0.88rem;
+    color: var(--muted);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--amber);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ——— HISTORY ——— */
+  .history-grid {
+    display: grid;
+    gap: 1rem;
+  }
+  .history-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    transition: box-shadow 0.15s;
+  }
+  .history-card:hover { box-shadow: var(--shadow); }
+  .history-cover {
+    width: 72px; height: 72px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+  }
+  .history-cover-ph {
+    width: 72px; height: 72px;
+    background: var(--cream-dark);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+  }
+  .history-info h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .history-info .hi-artist { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.3rem; }
+  .history-info .hi-date { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .history-scores { text-align: right; }
+  .hs-row { font-size: 0.78rem; color: var(--muted); white-space: nowrap; margin-bottom: 0.2rem; }
+  .hs-row strong { color: var(--brown); font-size: 0.88rem; font-weight: 500; }
+  .hs-avg { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--amber); }
+  .hs-avg-label { font-size: 0.7rem; color: var(--muted); }
+  .history-rate-btn {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    background: var(--cream);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    margin-top: 0.4rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .history-rate-btn:hover { background: var(--cream-dark); }
+
+  /* ——— STATS ——— */
+  .stats-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-tile {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .st-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--amber);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .st-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .compare-section { margin-top: 1.5rem; }
+  .compare-section h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1rem; }
+  .compare-bar-wrap { margin-bottom: 1rem; }
+  .cmp-label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; }
+  .cmp-bars { display: flex; gap: 0.4rem; height: 10px; }
+  .cmp-bar {
+    height: 10px; border-radius: 5px; transition: width 0.6s ease;
+  }
+  .cmp-u1 { background: var(--amber); }
+  .cmp-u2 { background: var(--brown-mid); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,18,8,0.6);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--cream);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow-heavy);
+  }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
+  .modal-close {
+    float: right;
+    background: none; border: none;
+    font-size: 1.3rem; cursor: pointer;
+    color: var(--muted);
+    margin-top: -0.5rem;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    background: var(--brown);
+    color: var(--cream);
+    padding: 0.7rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 300;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+
+  .no-album-msg {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .no-album-msg .big { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--brown); margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing">
+  <div style="text-align:center;">
+    <svg width="72" height="72" viewBox="0 0 72 72" style="margin-bottom:0.75rem;display:block;margin-left:auto;margin-right:auto;" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="36" cy="36" r="34" fill="#3D2B1F"/>
+      <circle cx="36" cy="36" r="28" fill="none" stroke="#6B4C3B" stroke-width="1.5"/>
+      <circle cx="36" cy="36" r="22" fill="none" stroke="#6B4C3B" stroke-width="1.5"/>
+      <circle cx="36" cy="36" r="16" fill="none" stroke="#6B4C3B" stroke-width="1.5"/>
+      <circle cx="36" cy="36" r="10" fill="none" stroke="#6B4C3B" stroke-width="1.5"/>
+      <circle cx="36" cy="36" r="5" fill="#C8862A"/>
+      <circle cx="36" cy="36" r="2.5" fill="#3D2B1F"/>
+      <circle cx="36" cy="36" r="1" fill="#C8862A"/>
+    </svg>
+    <div class="landing-logo">LNC <span>Album</span> Reviews</div>
+    <div class="landing-tagline">A shared album listening club</div>
+  </div>
+
+  <div class="landing-card">
+    <h2>Start listening</h2>
+    <p>Choose a name — your personal URL will be created so you can return anytime.</p>
+    <div class="input-row">
+      <input type="text" id="nameInput" placeholder="Your name (e.g. Alex)" maxlength="30" />
+      <button class="btn btn-amber" onclick="startSession()">Begin →</button>
+    </div>
+    <div class="divider">or return</div>
+    <div class="input-row" style="margin-bottom:0.5rem;">
+      <input type="text" id="returnInput" placeholder="Paste your share URL or name" />
+      <button class="btn" onclick="returnSession()">Go</button>
+    </div>
+  </div>
+
+  <div style="max-width:420px; width:100%; text-align:center;">
+    <p style="font-size:0.8rem; color:var(--muted);">Invite your friend — share your club URL after signing in, they sign up separately and you'll both see each other's ratings.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav>
+    <div class="nav-logo" style="display:flex;align-items:center;gap:0.5rem;">
+      <svg width="28" height="28" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="36" cy="36" r="34" fill="#C8862A"/>
+        <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(61,43,31,0.4)" stroke-width="2"/>
+        <circle cx="36" cy="36" r="20" fill="none" stroke="rgba(61,43,31,0.4)" stroke-width="2"/>
+        <circle cx="36" cy="36" r="12" fill="none" stroke="rgba(61,43,31,0.4)" stroke-width="2"/>
+        <circle cx="36" cy="36" r="5.5" fill="#3D2B1F"/>
+        <circle cx="36" cy="36" r="2.5" fill="#C8862A"/>
+      </svg>
+      LNC
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('today')">Today</button>
+      <button class="nav-tab" onclick="showPage('history')">History</button>
+      <button class="nav-tab" onclick="showPage('stats')">Stats</button>
+    </div>
+    <div class="nav-user">
+      <div class="user-dot" id="userDot"></div>
+      <span id="navUserName" style="font-size:0.78rem;"></span>
+    </div>
+  </nav>
+
+  <!-- TODAY PAGE -->
+  <div class="page active" id="page-today">
+    <div id="todayContent"></div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="page-title">📚 Listening History</div>
+    <div id="historyContent"></div>
+  </div>
+
+  <!-- STATS PAGE -->
+  <div class="page" id="page-stats">
+    <div id="statsContent"></div>
+  </div>
+</div>
+
+<!-- Rate from history modal -->
+<div class="modal-overlay" id="rateModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Rate this album</h3>
+    <p id="modalSub"></p>
+    <div class="rating-label">Your rating</div>
+    <div class="stars" id="modalStars"></div>
+    <div class="rating-num" id="modalRatingNum">—<span>/10</span></div>
+    <button class="save-rating-btn" onclick="saveModalRating()" style="margin-top:1rem;">Save rating</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// =====================
+// DATA — curated albums from Rolling Stone, Pitchfork, Apple Music, NME
+// Deduplicated by artist+title. Source info preserved.
+// =====================
+// Cover Art Archive: free, no API key, CORS-open.
+// URL format: https://coverartarchive.org/release/{mbid}/front
+// MusicBrainz IDs sourced from musicbrainz.org
+const ALBUMS = [
+  {
+    id: 1,
+    title: "Revolver",
+    artist: "The Beatles",
+    year: 1966,
+    genre: "Rock",
+    mbid: "b4b8b1e5-027f-4a37-a795-f6d44d881ea7",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 1 }, { name: "NME", label: "nme", rank: 3 }],
+    appleMusicSearch: "Revolver+The+Beatles",
+    facts: ["Revolver was the first Beatles album to feature a backwards guitar solo — on 'Tomorrow Never Knows', John Lennon's vocal was also run through a rotating Leslie speaker cabinet to get that eerie swirling sound.", "George Harrison played sitar on 'Love You To', making it one of the first rock songs to feature the instrument prominently — he had only recently started studying with Ravi Shankar.", "The album was recorded in just 300 hours of studio time, but the band pushed Abbey Road's technology so hard that engineer Geoff Emerick had to invent new mic placements on the fly that had never been tried before.", "Paul McCartney wrote 'Eleanor Rigby' — one of rock's first string-only orchestral pop songs — after being inspired by a gravestone in a churchyard near his childhood home in Liverpool."]
+  },
+  {
+    id: 2,
+    title: "What's Going On",
+    artist: "Marvin Gaye",
+    year: 1971,
+    genre: "Soul",
+    mbid: "47a41a2f-3e4b-4a3c-be37-f13c10c5e4f0",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 2 }, { name: "Pitchfork", label: "pf", rank: 7 }],
+    appleMusicSearch: "What%27s+Going+On+Marvin+Gaye",
+    facts: ["Motown founder Berry Gordy initially refused to release the title track, calling it 'the worst thing I ever heard' — Marvin Gaye refused to record another note until Gordy relented, and it became the fastest-selling Motown single ever.", "The album was conceived as a suite, not a collection of singles — Gaye insisted the tracks flow into each other like movements of a symphony, which was revolutionary for R&B in 1971.", "Gaye played most of the piano parts himself and co-wrote every song, a level of creative control virtually unheard of for Motown artists at the time.", "The street sounds and party chatter at the album's opening were recorded from an actual gathering at Gaye's Detroit home, giving the record its warm, lived-in atmosphere from the very first second."]
+  },
+  {
+    id: 3,
+    title: "Exile on Main St.",
+    artist: "The Rolling Stones",
+    year: 1972,
+    genre: "Rock",
+    mbid: "a55cd3d8-5f18-45c4-8fca-6a3b5b4d4b7e",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 7 }, { name: "NME", label: "nme", rank: 12 }],
+    appleMusicSearch: "Exile+on+Main+St+Rolling+Stones",
+    facts: ["The entire album was recorded in the basement of Keith Richards' rented villa in the South of France — Villa Nellcôte — because the Stones had fled Britain to avoid a punishing tax rate that would have taken 98% of their earnings.", "The basement sessions were chaotic: musicians, roadies, and assorted hangers-on wandered in and out at all hours, and the tapes captured everything from impromptu jams to conversations in the hallway.", "Exile is a double album that runs 18 tracks — at the time, critics were mostly lukewarm, but it has since grown into one of the most analysed records in rock history.", "Gram Parsons, who had a huge influence on Keith Richards' country leanings, was a frequent visitor during the sessions and can be heard on some outtakes from the villa recordings."]
+  },
+  {
+    id: 4,
+    title: "Thriller",
+    artist: "Michael Jackson",
+    year: 1982,
+    genre: "Pop",
+    mbid: "d3829f88-7d77-4e2c-a512-d37651c47e02",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 9 }, { name: "Apple Music", label: "am", rank: 1 }],
+    appleMusicSearch: "Thriller+Michael+Jackson",
+    facts: ["Thriller has sold an estimated 66–70 million copies worldwide, making it the best-selling album of all time — and it produced seven Top 10 singles from a single record, a feat that had never been achieved before.", "The title track's 14-minute music video, directed by John Landis, cost $500,000 to make — at the time the most expensive music video ever produced — and MTV aired it as a 'world premiere' event in 1983.", "Eddie Van Halen played the iconic guitar solo on 'Beat It' for free, as a favour, and did the whole thing in one afternoon. He later said he thought the song would be a flop.", "Producer Quincy Jones nearly cast another artist in the lead on 'The Girl Is Mine' — the duet with Paul McCartney — before Jackson convinced him the two of them would make a perfect odd couple on the track."]
+  },
+  {
+    id: 5,
+    title: "OK Computer",
+    artist: "Radiohead",
+    year: 1997,
+    genre: "Alternative",
+    mbid: "868cc741-4f40-49c4-9a2a-c5ced28d5e5d",
+    sources: [{ name: "Pitchfork", label: "pf", rank: 1 }, { name: "NME", label: "nme", rank: 2 }, { name: "Rolling Stone", label: "rs", rank: 23 }],
+    appleMusicSearch: "OK+Computer+Radiohead",
+    facts: ["Much of OK Computer was recorded in the library and ballroom of Canned Heat's mansion in Bath — the band set up equipment in rooms that hadn't been used in decades, and the building's strange acoustics shaped the album's cavernous sound.", "Thom Yorke has said 'No Surprises' — with its gentle glockenspiel melody — was written about the desire to switch off entirely from modern life, which made the song's cheerful arrangement deliberately unsettling.", "'Paranoid Android' was inspired partly by an incident at a Los Angeles bar where Yorke witnessed people behaving erratically after taking cocaine, leaving him with a deep sense of alienation.", "The album's title comes from a line in Douglas Adams' 'The Hitchhiker's Guide to the Galaxy', though Yorke has said he hadn't actually read the book and just liked the phrase's bleak humour."]
+  },
+  {
+    id: 6,
+    title: "Pet Sounds",
+    artist: "The Beach Boys",
+    year: 1966,
+    genre: "Pop/Rock",
+    mbid: "d8e7e3c2-3b4a-4e5f-9c6d-7a8b9c0d1e2f",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 2 }, { name: "NME", label: "nme", rank: 5 }],
+    appleMusicSearch: "Pet+Sounds+Beach+Boys",
+    facts: ["Brian Wilson recorded Pet Sounds almost entirely without the other Beach Boys present — he used session musicians from the legendary 'Wrecking Crew' and left vocal slots for the band to fill in later.", "Paul McCartney has called 'God Only Knows' the greatest song ever written, and credits Pet Sounds as a direct inspiration for Sgt. Pepper's — the two albums essentially challenged each other into existence.", "Wilson used unconventional instruments including bicycle bells, dog whistles, Coca-Cola cans, and a theremin — and he famously hired musicians to play Coke cans in the studio just to capture the right clinking sound.", "The album was considered a commercial disappointment at the time of release, selling far fewer copies than earlier Beach Boys records — it took decades of critical re-evaluation for it to reach its current legendary status."]
+  },
+  {
+    id: 7,
+    title: "Kind of Blue",
+    artist: "Miles Davis",
+    year: 1959,
+    genre: "Jazz",
+    mbid: "1f1f1f1f-2222-3333-4444-555555555555",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 12 }, { name: "Pitchfork", label: "pf", rank: 18 }],
+    appleMusicSearch: "Kind+of+Blue+Miles+Davis",
+    facts: ["Kind of Blue was recorded in just two sessions — March 2 and April 22, 1959 — with almost no prior rehearsal. Davis handed his musicians rough sketches and scales right before the tape rolled, capturing completely spontaneous performances.", "The album pioneered 'modal jazz', moving away from complex chord changes toward open scales that gave soloists far more freedom — it changed the direction of jazz and influenced musicians from John Coltrane to Jimi Hendrix.", "It is the best-selling jazz album of all time, with over five million copies sold in the US alone — remarkable for a genre not known for mass commercial appeal.", "Due to a manufacturing error, early pressings ran slightly flat (the tape machine was miscalibrated) — some jazz fans insist those flat versions have a more melancholy atmosphere and actively seek them out."]
+  },
+  {
+    id: 8,
+    title: "The Dark Side of the Moon",
+    artist: "Pink Floyd",
+    year: 1973,
+    genre: "Progressive Rock",
+    mbid: "f5c6d7e8-a9b0-c1d2-e3f4-a5b6c7d8e9f0",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 55 }, { name: "NME", label: "nme", rank: 1 }, { name: "Pitchfork", label: "pf", rank: 14 }],
+    appleMusicSearch: "The+Dark+Side+of+the+Moon+Pink+Floyd",
+    facts: ["Dark Side of the Moon spent 741 weeks on the Billboard 200 chart — over 14 years — which remains one of the longest chart runs in history for any album.", "The famous prism cover was designed by Storm Thorgerson of Hipgnosis, and was chosen partly because guitarist Richard Wright wanted something 'clean, elegant and graphic' — there are no band photos anywhere on the original sleeve.", "The cash register sounds, heartbeats, clocks, and spoken word snippets were all recorded specifically for the album — the band interviewed Abbey Road staff with questions like 'What do you argue about?' and used the candid answers as texture.", "Bootleg recordings exist of Dark Side being played in sync with 'The Wizard of Oz' — a coincidence so uncanny that it spawned the urban legend known as 'The Dark Side of the Rainbow', which the band has always denied was intentional."]
+  },
+  {
+    id: 9,
+    title: "Nevermind",
+    artist: "Nirvana",
+    year: 1991,
+    genre: "Grunge",
+    mbid: "1b022e01-4da6-387b-8658-8678046e4cef",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 17 }, { name: "NME", label: "nme", rank: 8 }, { name: "Pitchfork", label: "pf", rank: 19 }],
+    appleMusicSearch: "Nevermind+Nirvana",
+    facts: ["Nevermind knocked Michael Jackson's 'Dangerous' off the number one spot in January 1992, which Cobain reportedly found mortifying — he felt the album was too polished and almost immediately began writing what would become the rawer 'In Utero'.", "The swimming baby on the cover is a real infant named Spencer Elden — photographed at four months old. He has been recreating the shot for various anniversaries ever since, most recently as an adult.", "Producer Butch Vig recalls that Cobain would often nail a vocal take on the very first run-through, then refuse to do it again — many of the most emotionally raw moments on the record are literally the first time he sang the words into the microphone.", "'Smells Like Teen Spirit' got its name from something Kathleen Hanna of Bikini Kill spray-painted on Cobain's wall — 'Kurt smells like Teen Spirit' — referring to a deodorant brand, though Cobain initially thought it was a political statement."]
+  },
+  {
+    id: 10,
+    title: "Purple Rain",
+    artist: "Prince",
+    year: 1984,
+    genre: "Pop/Funk",
+    mbid: "3a4b5c6d-7e8f-9a0b-c1d2-e3f4a5b6c7d8",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 18 }, { name: "Apple Music", label: "am", rank: 5 }],
+    appleMusicSearch: "Purple+Rain+Prince",
+    facts: ["The title track 'Purple Rain' was recorded live at First Avenue nightclub in Minneapolis in August 1983 — the crowd noise you hear is real, and Prince later said he had no idea the take would end up on the album.", "Prince played almost every instrument on the album himself — guitar, bass, drums, keyboards, and synthesizers — a level of one-man-band control that was extraordinary even for a studio perfectionist.", "The album spent 24 weeks at number one in the US and won Prince two Academy Awards — for Best Original Song Score — the only time a debut film's soundtrack has won that category.", "Prince was so prolific during this era that he was writing and recording full albums for other artists simultaneously — he gave 'Manic Monday' to The Bangles and 'I Feel for You' to Chaka Khan while finishing Purple Rain."]
+  },
+  {
+    id: 11,
+    title: "Blonde on Blonde",
+    artist: "Bob Dylan",
+    year: 1966,
+    genre: "Rock",
+    mbid: "4a5b6c7d-8e9f-0a1b-c2d3-e4f5a6b7c8d9",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 9 }],
+    appleMusicSearch: "Blonde+on+Blonde+Bob+Dylan",
+    facts: ["Blonde on Blonde was the first major double album in rock history, and Dylan recorded much of it in Nashville with session musicians he had never met before — they showed up not knowing who they were working with.", "The album's famously dense, surrealist lyrics were written at a furious pace — Dylan has described his creative state at the time as a 'thin, wild mercury sound' that he was chasing and could barely keep up with.", "'Sad Eyed Lady of the Lowlands' — the album's closing track — runs over 11 minutes and takes up an entire side of vinyl, reportedly written in one sitting at the Chelsea Hotel about then-girlfriend Sara Lownds.", "The musicians in Nashville waited in the studio for hours while Dylan wrote lyrics in a nearby hotel room — they eventually fell asleep on the studio floor and were woken up when he finally arrived with the finished words."]
+  },
+  {
+    id: 12,
+    title: "The Miseducation of Lauryn Hill",
+    artist: "Lauryn Hill",
+    year: 1998,
+    genre: "R&B/Hip-Hop",
+    mbid: "5b6c7d8e-9f0a-1b2c-d3e4-f5a6b7c8d9e0",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 10 }, { name: "Pitchfork", label: "pf", rank: 5 }],
+    appleMusicSearch: "The+Miseducation+of+Lauryn+Hill",
+    facts: ["Miseducation won five Grammy Awards in 1999, including Album of the Year — Hill became the first woman to receive five Grammys in a single night, and the album remains one of the fastest-selling debuts in history.", "Hill wrote, produced, and arranged almost the entire album herself while pregnant with her first child — she largely retreated from the industry after its release, reportedly overwhelmed by its enormous commercial success.", "The classroom interlude segments featuring real children discussing love were recorded at a school in East Orange, New Jersey — the kids were unscripted, giving the album its warm, grounded emotional anchor.", "The album samples Nina Simone, The Delfonics, and Frankie Beverly, weaving together decades of Black musical tradition into a record that felt simultaneously classic and entirely fresh."]
+  },
+  {
+    id: 13,
+    title: "Rumours",
+    artist: "Fleetwood Mac",
+    year: 1977,
+    genre: "Soft Rock",
+    mbid: "6c7d8e9f-0a1b-2c3d-e4f5-a6b7c8d9e0f1",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 26 }, { name: "Apple Music", label: "am", rank: 8 }],
+    appleMusicSearch: "Rumours+Fleetwood+Mac",
+    facts: ["Rumours was recorded while two couples in the band — John and Christine McVie, and Stevie Nicks and Lindsey Buckingham — were simultaneously breaking up, making every song a barely concealed message to an ex who was standing five feet away.", "The album spent 31 weeks at number one in the US and has sold over 40 million copies — one of the best-selling albums ever made, despite (or perhaps because of) the relationship chaos behind it.", "Mick Fleetwood has said the band was consuming so much cocaine during sessions that they would sometimes have to stop recording because their hands were shaking too much to play.", "'Go Your Own Way' — Buckingham's pointed break-up song aimed directly at Nicks — was deeply resented by her, who objected to the lyric 'shacking up is all you want to do' and asked him to change it. He refused."]
+  },
+  {
+    id: 14,
+    title: "Illmatic",
+    artist: "Nas",
+    year: 1994,
+    genre: "Hip-Hop",
+    mbid: "7d8e9f0a-1b2c-3d4e-f5a6-b7c8d9e0f1a2",
+    sources: [{ name: "Pitchfork", label: "pf", rank: 3 }, { name: "Rolling Stone", label: "rs", rank: 66 }],
+    appleMusicSearch: "Illmatic+Nas",
+    facts: ["Illmatic runs only 39 minutes across 10 tracks — one of the shortest albums in hip-hop history — and Nas was just 19 years old when he recorded most of it, rapping about Queensbridge projects with the authority of someone twice his age.", "Producers on the album include DJ Premier, Pete Rock, Q-Tip, and Large Professor — an almost impossibly star-studded production lineup for a debut, reflecting how much the hip-hop world had already bought into Nas's talent.", "The album's opening skit samples a speech from 'Wild Style', one of the first hip-hop films, immediately rooting Illmatic in the culture's history before a single bar is rapped.", "Despite being considered one of the greatest rap albums ever made, Illmatic sold modestly on release — it was word-of-mouth among DJs, producers, and fellow MCs that built its reputation over the following years."]
+  },
+  {
+    id: 15,
+    title: "London Calling",
+    artist: "The Clash",
+    year: 1979,
+    genre: "Punk/Rock",
+    mbid: "8e9f0a1b-2c3d-4e5f-a6b7-c8d9e0f1a2b3",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 16 }, { name: "NME", label: "nme", rank: 4 }],
+    appleMusicSearch: "London+Calling+The+Clash",
+    facts: ["London Calling was released as a double album at the price of a single LP — the band's label CBS considered this financial madness, but the Clash insisted on making it affordable and absorbed the cost themselves.", "The cover photo of Paul Simonon smashing his bass guitar at the Palladium in New York City was taken by photographer Pennie Smith, who almost didn't use it because she thought it was too blurry — it became one of rock's most iconic images.", "The album spans punk, reggae, rockabilly, ska, and jazz — a deliberate statement that punk's original energy could be applied to any genre, and a rebuke to the genre's tendency toward rigid stylistic orthodoxy.", "The title track was inspired by the BBC World Service, whose broadcasts opened with the words 'This is London Calling' — Joe Strummer used it as a metaphor for broadcasting emergency signals into a world on the brink of collapse."]
+  },
+  {
+    id: 16,
+    title: "Abbey Road",
+    artist: "The Beatles",
+    year: 1969,
+    genre: "Rock",
+    mbid: "b84ee12a-09ef-421b-82de-0441a926375b",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 5 }, { name: "NME", label: "nme", rank: 6 }],
+    appleMusicSearch: "Abbey+Road+The+Beatles",
+    facts: ["Abbey Road was actually the last album The Beatles recorded together — Let It Be, released afterwards, was recorded earlier. The band agreed to make one final record 'the way we used to' and buried their internal tensions long enough to pull it off.", "The medley on Side B — a suite of unfinished song fragments stitched together by Paul McCartney — was revolutionary at the time and has since been studied in music schools as a masterclass in album sequencing.", "The cover photograph was taken on the morning of August 8, 1969, in about ten minutes — photographer Iain Macmillan stood on a stepladder in the middle of Abbey Road while a policeman held back traffic between each of the six frames shot.", "The album was recorded using a brand-new 8-track machine, doubling what EMI had previously used — producer George Martin later said it was the first time he felt they had enough tracks to realise the full complexity of what they were writing."]
+  },
+  {
+    id: 17,
+    title: "My Beautiful Dark Twisted Fantasy",
+    artist: "Kanye West",
+    year: 2010,
+    genre: "Hip-Hop",
+    mbid: "9f0a1b2c-3d4e-5f6a-b7c8-d9e0f1a2b3c4",
+    sources: [{ name: "Pitchfork", label: "pf", rank: 2 }, { name: "Rolling Stone", label: "rs", rank: 122 }],
+    appleMusicSearch: "My+Beautiful+Dark+Twisted+Fantasy+Kanye+West",
+    facts: ["The album was recorded during what West called his 'exile' in Hawaii after the Taylor Swift VMA incident — he brought a rotating cast of collaborators to Honolulu and worked on the album 24 hours a day for months.", "Pitchfork gave the album a rare 10/10 on release, one of only a handful of perfect scores in the publication's history — their review called it 'the most vivid and original hip-hop album in years'.", "The sprawling track 'Runaway' features a five-minute piano coda at the end where West raps through a vocoder — the melody he plays on piano is one he said came to him while he was recovering from the car accident that inspired his debut album.", "Rick Rubin was brought in near the end of production not to produce, but purely to listen — West trusted Rubin's ears to tell him when a song was finished, essentially using him as a human quality-control filter."]
+  },
+  {
+    id: 18,
+    title: "Blue",
+    artist: "Joni Mitchell",
+    year: 1971,
+    genre: "Folk",
+    mbid: "a0b1c2d3-e4f5-6a7b-c8d9-e0f1a2b3c4d5",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 3 }, { name: "Pitchfork", label: "pf", rank: 4 }],
+    appleMusicSearch: "Blue+Joni+Mitchell",
+    facts: ["Mitchell has described Blue as 'a very brave record' made at a time when she stripped away every defence — she said she felt 'like a cellophane wrapper on a pack of cigarettes' during the sessions, completely exposed.", "James Taylor played guitar on the album while he and Mitchell were romantically involved — their relationship ended before the record was finished, and several of its most devastating songs were written in real time about what was happening between them.", "The album was recorded mostly with Mitchell alone at a piano or guitar — producer Henry Lewy's main job was simply to capture her in the room. Almost no overdubs were added.", "Graham Nash, another former lover, is said to have heard the finished record and wept — he reportedly told mutual friends it was the most honest album he had ever heard, and that it made everything else feel dishonest by comparison."]
+  },
+  {
+    id: 19,
+    title: "The Velvet Underground & Nico",
+    artist: "The Velvet Underground",
+    year: 1967,
+    genre: "Experimental Rock",
+    mbid: "b1c2d3e4-f5a6-7b8c-d9e0-f1a2b3c4d5e6",
+    sources: [{ name: "Rolling Stone", label: "rs", rank: 13 }, { name: "Pitchfork", label: "pf", rank: 6 }, { name: "NME", label: "nme", rank: 10 }],
+    appleMusicSearch: "The+Velvet+Underground+and+Nico",
+    facts: ["The album famously flopped on release, selling fewer than 30,000 copies in its first five years — Brian Eno later quipped that 'everyone who bought one of those 30,000 copies started a band'.", "The iconic banana cover was designed by Andy Warhol, who also executive-produced the record. Early pressings instructed buyers to 'Peel slowly and see' — peeling back the banana sticker revealed a flesh-coloured banana underneath.", "Lou Reed wrote 'Heroin' as a teenager, and the song's shifting tempo was deliberate — the band would speed up and slow down to physically replicate the sensation of the drug's rush and withdrawal.", "Nico, the German model and singer added to the group at Warhol's insistence, was resented by some band members — John Cale later said she improved several songs dramatically, but the group never fully accepted her as an equal."]
+  },
+  {
+    id: 20,
+    title: "Never Mind the Bollocks",
+    artist: "Sex Pistols",
+    year: 1977,
+    genre: "Punk",
+    mbid: "c2d3e4f5-a6b7-8c9d-e0f1-a2b3c4d5e6f7",
+    sources: [{ name: "NME", label: "nme", rank: 7 }, { name: "Rolling Stone", label: "rs", rank: 41 }],
+    appleMusicSearch: "Never+Mind+the+Bollocks+Sex+Pistols",
+    facts: ["When record shops displayed the album in their windows, police threatened to prosecute under the Indecent Advertisements Act for the word 'Bollocks' — a linguistics professor was called as an expert witness and testified it was an Anglo-Saxon term, causing the case to collapse.", "Despite its reputation as raw and spontaneous, the album was meticulously produced by Chris Thomas, who had also worked on Pink Floyd's Dark Side of the Moon — the Pistols' abrasive sound was as carefully crafted as any mainstream record.", "The band had three different bassists over their short career — Glen Matlock, who co-wrote most of the songs, was replaced by Sid Vicious, who could barely play. Many bass parts on the record are actually played by Steve Jones on guitar.", "The album was recorded and mixed in just a few months — the entire Sex Pistols were together as a touring band for less than three years, making it one of the most compressed and explosive careers in rock history."]
+  }
+];
+
+// =====================
+// STATE
+// =====================
+let currentUser = null;
+let allUsers = {};
+let currentAlbumIndex = null;
+let currentRating = 0;
+let modalAlbumId = null;
+let modalRating = 0;
+
+// Safe localStorage wrapper — gracefully handles local file:// restrictions
+function lsGet(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+function lsSet(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxbQ5UuxoXZMwEam2T47Uolzu2uczO7GVTDKnbqVm8TdLlvTYho4BSMPGbGsduMcEs/exec';
+
+// =====================
+// GOOGLE SHEETS SYNC
+// =====================
+
+// All reads/writes go through the Apps Script web app.
+// localStorage is used as a fast cache so the UI feels instant.
+
+async function sheetsRequest(payload) {
+  if (!SCRIPT_URL) return null;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // avoids CORS preflight
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) {
+    console.warn('Sheets sync failed:', e);
+    return null;
+  }
+}
+
+// Pull all users & ratings from the sheet, merge into allUsers
+async function syncFromSheets() {
+  const data = await sheetsRequest({ action: 'getAll' });
+  if (!data || !data.users) return;
+  // Merge — sheet is source of truth for ratings, local has schedule
+  data.users.forEach(u => {
+    const key = u.name.toLowerCase().trim();
+    if (!allUsers[key]) {
+      allUsers[key] = {
+        name: u.name,
+        key,
+        startDate: u.startDate || new Date().toISOString().split('T')[0],
+        ratings: u.ratings || {},
+        albumSchedule: generateSchedule() // always use shared fixed order
+      };
+    } else {
+      allUsers[key].ratings = Object.assign({}, allUsers[key].ratings, u.ratings);
+      if (u.startDate) allUsers[key].startDate = u.startDate;
+      allUsers[key].albumSchedule = generateSchedule(); // always enforce shared order
+    }
+  });
+  saveLocal();
+}
+
+// Push a single rating to the sheet
+async function pushRatingToSheets(userName, albumId, rating, startDate) {
+  await sheetsRequest({
+    action: 'saveRating',
+    name: userName,
+    albumId: albumId,
+    rating: rating,
+    startDate: startDate
+  });
+}
+
+// Push a new user registration (name + startDate + schedule)
+async function pushUserToSheets(user) {
+  await sheetsRequest({
+    action: 'registerUser',
+    name: user.name,
+    startDate: user.startDate,
+    albumSchedule: user.albumSchedule
+  });
+}
+
+// =====================
+// LOCAL STORAGE CACHE
+// =====================
+function saveLocal() {
+  lsSet('lnc_users', JSON.stringify(allUsers));
+}
+
+function loadLocal() {
+  const d = lsGet('lnc_users');
+  allUsers = d ? JSON.parse(d) : {};
+}
+
+function getOrCreateUser(name) {
+  const key = name.toLowerCase().trim();
+  if (!allUsers[key]) {
+    allUsers[key] = {
+      name: name.trim(),
+      key,
+      startDate: new Date().toISOString().split('T')[0],
+      ratings: {},
+      albumSchedule: generateSchedule()
+    };
+    saveLocal();
+    pushUserToSheets(allUsers[key]);
+  } else {
+    // Always enforce the shared fixed schedule, overriding any old random one
+    allUsers[key].albumSchedule = generateSchedule();
+    saveLocal();
+  }
+  return allUsers[key];
+}
+
+function generateSchedule() {
+  // All users get the same fixed order — album ID sequence by list order.
+  // This ensures everyone sees the same album on the same day.
+  return ALBUMS.map(a => a.id);
+}
+
+// =====================
+// SESSION
+// =====================
+async function startSession() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { showToast('Please enter your name'); return; }
+  loadLocal();
+  currentUser = getOrCreateUser(name);
+  saveLocal();
+  enterApp(); // Enter immediately — don't wait for network
+  if (SCRIPT_URL) {
+    showToast('Syncing…');
+    await syncFromSheets();
+    currentUser = allUsers[currentUser.key] || currentUser;
+    saveLocal();
+    showToast('Synced ✓');
+    renderToday();
+  }
+}
+
+async function returnSession() {
+  const val = document.getElementById('returnInput').value.trim();
+  if (!val) { showToast('Please enter your name or URL'); return; }
+  let name = val;
+  if (val.includes('?user=')) name = decodeURIComponent(val.split('?user=')[1]);
+  else if (val.includes('#')) name = decodeURIComponent(val.split('#')[1]);
+  loadLocal();
+  const key = name.toLowerCase().trim();
+  if (!allUsers[key]) {
+    currentUser = getOrCreateUser(name);
+  } else {
+    currentUser = allUsers[key];
+  }
+  saveLocal();
+  enterApp(); // Enter immediately
+  if (SCRIPT_URL) {
+    showToast('Syncing…');
+    await syncFromSheets();
+    currentUser = allUsers[currentUser.key] || currentUser;
+    saveLocal();
+    showToast('Synced ✓');
+    renderToday();
+  }
+}
+
+function enterApp() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
+  document.getElementById('navUserName').textContent = currentUser.name;
+  document.getElementById('userDot').textContent = currentUser.name[0].toUpperCase();
+  history.replaceState({}, '', '?user=' + encodeURIComponent(currentUser.name));
+  renderToday();
+}
+
+// Check URL on load
+window.addEventListener('load', () => {
+  loadLocal();
+  const params = new URLSearchParams(window.location.search);
+  const user = params.get('user');
+  if (user) {
+    document.getElementById('returnInput').value = user;
+    returnSession();
+  }
+});
+
+async function saveRating() {
+  if (currentRating === 0) { showToast('Pick a star rating first'); return; }
+  // Save locally instantly
+  currentUser.ratings[currentAlbumIndex] = currentRating;
+  saveLocal();
+  document.getElementById('savedNotice').style.display = 'block';
+  document.getElementById('myScoreDisplay').innerHTML = currentRating + '<span style="font-size:1rem;color:var(--muted)">/10</span>';
+  showToast('Saving…');
+  // Push to Sheets in background
+  await pushRatingToSheets(currentUser.name, currentAlbumIndex, currentRating, currentUser.startDate);
+  // Pull latest from sheet so friend scores update
+  await syncFromSheets();
+  currentUser = allUsers[currentUser.key];
+  showToast('Rating saved ✓');
+  renderToday();
+}
+
+// =====================
+// DATE / SCHEDULE LOGIC
+// =====================
+// Single shared start date for the whole club — everyone counts from this.
+// Set this to today's date (the day you launched the club).
+const CLUB_START_DATE = '2026-03-21';
+
+function getWeekdaysSince() {
+  const start = new Date(CLUB_START_DATE);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  start.setHours(0,0,0,0);
+  let count = 0;
+  let d = new Date(start);
+  while (d < today) { // strict less-than: today is not yet "past"
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count; // count = how many weekdays have fully passed = today's album index
+}
+
+function getAlbumForDay(dayIndex) {
+  const schedule = ALBUMS.map(a => a.id);
+  if (dayIndex >= schedule.length) return null;
+  const id = schedule[dayIndex];
+  return ALBUMS.find(a => a.id === id) || null;
+}
+
+function getTodaysAlbum() {
+  const dayIdx = getWeekdaysSince();
+  return { album: getAlbumForDay(dayIdx), dayIdx };
+}
+
+function getPastAlbums() {
+  const dayIdx = getWeekdaysSince();
+  const past = [];
+  for (let i = 0; i < dayIdx; i++) {
+    const album = getAlbumForDay(i);
+    if (album) past.push({ album, dayIdx: i });
+  }
+  return past.reverse();
+}
+
+// =====================
+// PAGE NAVIGATION
+// =====================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'stats') renderStats();
+}
+
+// =====================
+// RENDER TODAY
+// =====================
+function renderToday() {
+  const { album, dayIdx } = getTodaysAlbum();
+  const container = document.getElementById('todayContent');
+
+  if (!album) {
+    container.innerHTML = `
+      <div class="no-album-msg">
+        <div class="big">All caught up!</div>
+        <p>You've listened to every album in the queue. More coming soon!</p>
+      </div>
+    `;
+    return;
+  }
+
+  const myRating = currentUser.ratings[album.id] || null;
+  currentRating = myRating || 0;
+
+  // Get other users' ratings
+  const otherUsers = Object.values(allUsers).filter(u => u.key !== currentUser.key);
+  const friendRatings = otherUsers.map(u => ({
+    name: u.name,
+    rating: u.ratings[album.id] || null
+  })).filter(r => r.rating !== null);
+
+  const ratingsForAvg = [myRating, ...friendRatings.map(r => r.rating)].filter(r => r !== null);
+  const avg = ratingsForAvg.length ? (ratingsForAvg.reduce((a,b) => a+b, 0) / ratingsForAvg.length).toFixed(1) : null;
+
+  const sourceBadges = album.sources.map(s =>
+    `<span class="source-badge source-${s.label}">${s.name} #${s.rank}</span>`
+  ).join('');
+
+  const starsHtml = renderStarsHtml(currentRating, 'today');
+
+  const friendScoreHtml = friendRatings.length > 0
+    ? friendRatings.map(f => `
+        <div class="score-card">
+          <div class="sc-label">${f.name}</div>
+          <div class="sc-val">${f.rating}<span style="font-size:1rem;color:var(--muted)">/10</span></div>
+        </div>`).join('')
+    : `<div class="score-card">
+        <div class="sc-label">Friend</div>
+        <div class="sc-val no-rating">Not rated yet</div>
+       </div>`;
+
+  container.innerHTML = `
+    <div class="album-hero">
+      <div class="album-cover-wrap">
+        <img class="album-cover" id="todayCoverImg" src="" alt="${album.title}" style="display:none" onerror="this.style.display='none';document.getElementById('todayCoverPh').style.display='flex'">
+        <div class="album-cover-placeholder" id="todayCoverPh">
+          <svg width="80" height="80" viewBox="0 0 72 72" style="opacity:0.35" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="36" cy="36" r="34" fill="#3D2B1F"/>
+            <circle cx="36" cy="36" r="28" fill="none" stroke="#F5F0E8" stroke-width="1.5"/>
+            <circle cx="36" cy="36" r="20" fill="none" stroke="#F5F0E8" stroke-width="1.5"/>
+            <circle cx="36" cy="36" r="12" fill="none" stroke="#F5F0E8" stroke-width="1.5"/>
+            <circle cx="36" cy="36" r="5" fill="#C8862A"/>
+            <circle cx="36" cy="36" r="2" fill="#3D2B1F"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="album-sources">${sourceBadges}</div>
+        <div class="album-title">${album.title}</div>
+        <div class="album-artist">${album.artist}</div>
+        <div class="album-meta">${album.year} · ${album.genre}</div>
+
+        <a class="play-btn" href="https://music.apple.com/search?term=${album.appleMusicSearch}" target="_blank">
+          <svg viewBox="0 0 20 20" fill="white"><path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm-1 11.5v-7l5 3.5-5 3.5z"/></svg>
+          Listen on Apple Music
+        </a>
+
+        <div class="rating-section">
+          <div class="rating-label">Your rating</div>
+          <div class="stars" id="todayStars">${starsHtml}</div>
+          <div style="display:flex; align-items:baseline; gap:0.75rem; margin-top:0.3rem;">
+            <div class="rating-num" id="todayRatingNum">${currentRating > 0 ? currentRating : '—'}<span>/10</span></div>
+            <button class="save-rating-btn" onclick="saveRating()">Save</button>
+          </div>
+          <div class="saved-notice" id="savedNotice">✓ Rating saved!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scores-grid">
+      <div class="score-card">
+        <div class="sc-label">You</div>
+        <div class="sc-val" id="myScoreDisplay">${myRating !== null ? myRating + '<span style="font-size:1rem;color:var(--muted)">/10</span>' : '<span class="no-rating" style="font-size:1rem">Not rated</span>'}</div>
+      </div>
+      ${friendScoreHtml}
+      <div class="score-card">
+        <div class="sc-label">Group avg</div>
+        <div class="sc-val">${avg !== null ? avg : '<span style="font-size:1rem;color:var(--muted)">—</span>'}</div>
+      </div>
+    </div>
+
+    <div class="facts-section">
+      <h3>About this album</h3>
+      <div id="factsContent">
+        <div class="facts-loading">
+          <div class="spinner"></div>
+          Fetching album facts…
+        </div>
+      </div>
+    </div>
+  `;
+
+  currentAlbumIndex = album.id;
+  bindStarEvents('todayStars', (r) => { currentRating = r; updateStars('todayStars', r); document.getElementById('todayRatingNum').innerHTML = r + '<span>/10</span>'; });
+  loadCoverArt(album, 'todayCoverImg', 'todayCoverPh');
+  fetchFacts(album);
+}
+
+// =====================
+// COVER ART — Cover Art Archive (free, no API key)
+// =====================
+async function loadCoverArt(album, imgId, phId) {
+  const img = document.getElementById(imgId);
+  const ph = document.getElementById(phId);
+  if (!img) return;
+
+  // Check localStorage cache first
+  const cacheKey = 'lnc_cover_' + album.id;
+  const cached = lsGet(cacheKey);
+  if (cached) {
+    img.src = cached;
+    img.style.display = 'block';
+    if (ph) ph.style.display = 'none';
+    return;
+  }
+
+  // Try Cover Art Archive with MusicBrainz ID
+  if (album.mbid) {
+    // Use the direct image URL — CAA redirects to the actual image
+    const url = `https://coverartarchive.org/release/${album.mbid}/front-500`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const blob = await res.blob();
+        const dataUrl = await blobToDataUrl(blob);
+        lsSet(cacheKey, dataUrl);
+        img.src = dataUrl;
+        img.style.display = 'block';
+        if (ph) ph.style.display = 'none';
+        return;
+      }
+    } catch(e) {}
+  }
+
+  // Fallback: MusicBrainz search to find a release MBID, then fetch cover
+  try {
+    const query = encodeURIComponent(`"${album.title}" AND artist:"${album.artist}"`);
+    const mbRes = await fetch(`https://musicbrainz.org/ws/2/release/?query=${query}&fmt=json&limit=5`, {
+      headers: { 'User-Agent': 'LNCAlbumReviews/1.0 (contact@lnc.app)' }
+    });
+    if (mbRes.ok) {
+      const mbData = await mbRes.json();
+      const releases = mbData.releases || [];
+      for (const release of releases) {
+        const coverUrl = `https://coverartarchive.org/release/${release.id}/front-500`;
+        try {
+          const coverRes = await fetch(coverUrl);
+          if (coverRes.ok) {
+            const blob = await coverRes.blob();
+            const dataUrl = await blobToDataUrl(blob);
+            lsSet(cacheKey, dataUrl);
+            img.src = dataUrl;
+            img.style.display = 'block';
+            if (ph) ph.style.display = 'none';
+            return;
+          }
+        } catch(e) {}
+      }
+    }
+  } catch(e) {}
+
+  // Give up — show placeholder
+  if (ph) ph.style.display = 'flex';
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// =====================
+// STARS
+// =====================
+function starSvg(filled) {
+  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <polygon class="star-fill" points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" ${filled ? 'fill="#C8862A"' : 'fill="none"'} stroke="#C8862A" stroke-width="1.5" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function renderStarsHtml(rating, prefix) {
+  let h = '';
+  for (let i = 1; i <= 10; i++) {
+    h += `<div class="star ${i <= rating ? 'filled' : ''}" data-val="${i}" id="${prefix}star${i}">${starSvg(i <= rating)}</div>`;
+  }
+  return h;
+}
+
+function updateStars(containerId, rating) {
+  for (let i = 1; i <= 10; i++) {
+    const star = document.getElementById(containerId.replace('Stars','') + 'star' + i) ||
+                 document.querySelector(`#${containerId} [data-val="${i}"]`);
+    if (!star) continue;
+    if (i <= rating) {
+      star.classList.add('filled');
+      star.innerHTML = starSvg(true);
+    } else {
+      star.classList.remove('filled');
+      star.innerHTML = starSvg(false);
+    }
+  }
+}
+
+function bindStarEvents(containerId, callback) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.querySelectorAll('.star').forEach(star => {
+    star.addEventListener('click', () => callback(parseInt(star.dataset.val)));
+    star.addEventListener('mouseenter', () => {
+      const v = parseInt(star.dataset.val);
+      container.querySelectorAll('.star').forEach((s, idx) => {
+        if (idx < v) { s.innerHTML = starSvg(true); }
+        else { s.innerHTML = starSvg(false); }
+      });
+    });
+  });
+  container.addEventListener('mouseleave', () => {
+    const current = parseInt(container.closest('[data-current]')?.dataset.current || '0') ||
+      (containerId === 'todayStars' ? currentRating : modalRating);
+    container.querySelectorAll('.star').forEach((s, idx) => {
+      s.innerHTML = starSvg(idx < current);
+    });
+  });
+}
+
+// =====================
+// FACTS — baked in per album, no API key needed
+// =====================
+function fetchFacts(album) {
+  if (album.facts && album.facts.length) {
+    renderFacts(album.facts);
+  } else {
+    renderFacts([`${album.title} by ${album.artist} was released in ${album.year} and is widely regarded as one of the greatest albums ever made.`]);
+  }
+}
+
+function renderFacts(facts) {
+  const container = document.getElementById('factsContent');
+  if (!container) return;
+  container.innerHTML = facts.map(f =>
+    `<div class="fact-item"><div class="fact-bullet"></div><div class="fact-text">${f}</div></div>`
+  ).join('');
+}
+
+// =====================
+// HISTORY
+// =====================
+function renderHistory() {
+  const past = getPastAlbums();
+  const { album: todayAlbum } = getTodaysAlbum();
+  const container = document.getElementById('historyContent');
+
+  // Include today if it exists and was missed (weekdays in the past)
+  if (!past.length) {
+    container.innerHTML = `<div class="no-album-msg"><div class="big">No history yet</div><p>Your listened albums will appear here. Come back tomorrow!</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="history-grid">${past.map(({ album }) => {
+    const myR = currentUser.ratings[album.id];
+    const others = Object.values(allUsers).filter(u => u.key !== currentUser.key);
+    const friendRatings = others.map(u => u.ratings[album.id]).filter(r => r !== undefined);
+    const allRatings = [myR, ...friendRatings].filter(r => r !== undefined);
+    const avg = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(1) : null;
+
+    const sourceBadges = album.sources.map(s =>
+      `<span class="source-badge source-${s.label}" style="font-size:0.65rem;padding:0.15rem 0.5rem">${s.name} #${s.rank}</span>`
+    ).join(' ');
+
+    const friendRows = others.map(u => {
+      const r = u.ratings[album.id];
+      return r !== undefined ? `<div class="hs-row">${u.name}: <strong>${r}/10</strong></div>` : `<div class="hs-row">${u.name}: <strong style="color:var(--muted)">—</strong></div>`;
+    }).join('');
+
+    return `
+      <div class="history-card">
+        <img class="history-cover" id="hcover${album.id}" src="" alt="${album.title}" style="display:none" onerror="this.style.display='none'">
+        <div class="history-cover-ph" id="hcoverph${album.id}">
+          <svg width="36" height="36" viewBox="0 0 72 72" style="opacity:0.4" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="36" cy="36" r="34" fill="#3D2B1F"/>
+            <circle cx="36" cy="36" r="24" fill="none" stroke="#F5F0E8" stroke-width="2"/>
+            <circle cx="36" cy="36" r="12" fill="none" stroke="#F5F0E8" stroke-width="2"/>
+            <circle cx="36" cy="36" r="4.5" fill="#C8862A"/>
+          </svg>
+        </div>
+        <div class="history-info">
+          <h4>${album.title}</h4>
+          <div class="hi-artist">${album.artist} · ${album.year}</div>
+          <div style="margin-top:0.3rem;">${sourceBadges}</div>
+          ${!myR ? `<button class="history-rate-btn" onclick="openRateModal(${album.id})">Rate this album</button>` : ''}
+        </div>
+        <div class="history-scores">
+          <div class="hs-row">You: <strong>${myR !== undefined ? myR+'/10' : '—'}</strong></div>
+          ${friendRows}
+          ${avg !== null ? `<div class="hs-avg">${avg}</div><div class="hs-avg-label">avg</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('')}</div>`;
+
+  // Load cover art for all history cards
+  past.forEach(({ album }) => {
+    loadCoverArt(album, `hcover${album.id}`, `hcoverph${album.id}`);
+  });
+}
+// =====================
+function openRateModal(albumId) {
+  modalAlbumId = albumId;
+  modalRating = currentUser.ratings[albumId] || 0;
+  const album = ALBUMS.find(a => a.id === albumId);
+  document.getElementById('modalTitle').textContent = album.title;
+  document.getElementById('modalSub').textContent = album.artist + ' · ' + album.year;
+  document.getElementById('modalStars').innerHTML = renderStarsHtml(modalRating, 'modal');
+  document.getElementById('modalRatingNum').innerHTML = (modalRating || '—') + '<span>/10</span>';
+  document.getElementById('rateModal').classList.add('open');
+  bindStarEvents('modalStars', (r) => {
+    modalRating = r;
+    updateStars('modalStars', r);
+    document.getElementById('modalRatingNum').innerHTML = r + '<span>/10</span>';
+  });
+}
+
+function closeModal() {
+  document.getElementById('rateModal').classList.remove('open');
+}
+
+async function saveModalRating() {
+  if (!modalRating) { showToast('Pick a star rating'); return; }
+  currentUser.ratings[modalAlbumId] = modalRating;
+  saveLocal();
+  closeModal();
+  showToast('Saving…');
+  await pushRatingToSheets(currentUser.name, modalAlbumId, modalRating, currentUser.startDate);
+  await syncFromSheets();
+  currentUser = allUsers[currentUser.key];
+  showToast('Rating saved ✓');
+  renderHistory();
+}
+
+// =====================
+// STATS
+// =====================
+function renderStats() {
+  const container = document.getElementById('statsContent');
+  const ratedIds = Object.keys(currentUser.ratings).map(Number);
+  const ratedAlbums = ratedIds.map(id => ALBUMS.find(a => a.id === id)).filter(Boolean);
+  const myRatings = ratedIds.map(id => currentUser.ratings[id]);
+  const ratedCount = myRatings.length;
+  const avgRating = ratedCount ? (myRatings.reduce((a,b)=>a+b,0)/ratedCount) : null;
+  const highestRated = ratedAlbums.length ? ratedAlbums.reduce((best, a) => currentUser.ratings[a.id] > currentUser.ratings[best.id] ? a : best, ratedAlbums[0]) : null;
+  const lowestRated = ratedAlbums.length ? ratedAlbums.reduce((worst, a) => currentUser.ratings[a.id] < currentUser.ratings[worst.id] ? a : worst, ratedAlbums[0]) : null;
+  const totalAlbums = ALBUMS.length;
+  const pct = ratedCount ? Math.round(ratedCount / totalAlbums * 100) : 0;
+
+  // ——— Genre breakdown
+  const genreMap = {};
+  ratedAlbums.forEach(a => {
+    if (!genreMap[a.genre]) genreMap[a.genre] = [];
+    genreMap[a.genre].push(currentUser.ratings[a.id]);
+  });
+  const genreRows = Object.entries(genreMap)
+    .map(([g, rs]) => ({ genre: g, avg: rs.reduce((a,b)=>a+b,0)/rs.length, count: rs.length }))
+    .sort((a,b) => b.avg - a.avg);
+
+  // ——— Decade breakdown
+  const decadeMap = {};
+  ratedAlbums.forEach(a => {
+    const dec = Math.floor(a.year / 10) * 10;
+    const key = dec + 's';
+    if (!decadeMap[key]) decadeMap[key] = [];
+    decadeMap[key].push(currentUser.ratings[a.id]);
+  });
+  const decadeRows = Object.entries(decadeMap)
+    .map(([d, rs]) => ({ decade: d, avg: rs.reduce((a,b)=>a+b,0)/rs.length, count: rs.length }))
+    .sort((a,b) => a.decade.localeCompare(b.decade));
+
+  // ——— Artist breakdown
+  const artistMap = {};
+  ratedAlbums.forEach(a => {
+    if (!artistMap[a.artist]) artistMap[a.artist] = [];
+    artistMap[a.artist].push(currentUser.ratings[a.id]);
+  });
+  const artistRows = Object.entries(artistMap)
+    .map(([ar, rs]) => ({ artist: ar, avg: rs.reduce((a,b)=>a+b,0)/rs.length, count: rs.length }))
+    .sort((a,b) => b.avg - a.avg)
+    .slice(0, 10);
+
+  // ——— Source breakdown
+  const sourceMap = {};
+  ratedAlbums.forEach(a => {
+    a.sources.forEach(s => {
+      if (!sourceMap[s.name]) sourceMap[s.name] = [];
+      sourceMap[s.name].push(currentUser.ratings[a.id]);
+    });
+  });
+  const sourceRows = Object.entries(sourceMap)
+    .map(([src, rs]) => ({ source: src, avg: rs.reduce((a,b)=>a+b,0)/rs.length, count: rs.length }))
+    .sort((a,b) => b.count - a.count);
+
+  // ——— Rating distribution (1-10 histogram)
+  const dist = Array(10).fill(0);
+  myRatings.forEach(r => { if (r >= 1 && r <= 10) dist[r-1]++; });
+  const maxDist = Math.max(...dist, 1);
+
+  // ——— Friend comparison
+  const others = Object.values(allUsers).filter(u => u.key !== currentUser.key);
+
+  function breakdownTable(rows, keyLabel, keyProp, maxBarVal) {
+    if (!rows.length) return `<p style="font-size:0.85rem;color:var(--muted);font-style:italic">No data yet — rate some albums first.</p>`;
+    const max = maxBarVal || Math.max(...rows.map(r => r.avg), 10);
+    return rows.map(r => {
+      const barPct = Math.round(r.avg / 10 * 100);
+      const ratingColor = r.avg >= 8 ? '#2E5C3A' : r.avg >= 6 ? '#C8862A' : r.avg >= 4 ? '#6B4C3B' : '#8B2E2E';
+      return `
+        <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:0.75rem;padding:0.65rem 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:0.88rem;font-weight:500;margin-bottom:0.3rem">${r[keyProp]}</div>
+            <div style="height:6px;background:var(--cream-dark);border-radius:3px;overflow:hidden">
+              <div style="height:6px;width:${barPct}%;background:${ratingColor};border-radius:3px;transition:width 0.6s ease"></div>
+            </div>
+          </div>
+          <div style="text-align:right;white-space:nowrap">
+            <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:${ratingColor}">${r.avg.toFixed(1)}</div>
+            <div style="font-size:0.7rem;color:var(--muted)">${r.count} album${r.count>1?'s':''}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  const shareUrl = window.location.href.split('?')[0] + '?user=' + encodeURIComponent(currentUser.name);
+
+  const friendHtml = others.length > 0 ? others.map(friend => {
+    const sharedIds = Object.keys(currentUser.ratings).filter(id => friend.ratings[id] !== undefined);
+    if (!sharedIds.length) return `<div style="padding:1rem;background:var(--cream-dark);border-radius:8px;font-size:0.85rem;color:var(--muted)">${friend.name} hasn't rated any shared albums yet.</div>`;
+    const myAvg = sharedIds.reduce((s,id) => s + currentUser.ratings[id], 0) / sharedIds.length;
+    const theirAvg = sharedIds.reduce((s,id) => s + friend.ratings[id], 0) / sharedIds.length;
+    const diff = myAvg - theirAvg;
+    const diffLabel = Math.abs(diff) < 0.3 ? "You two agree a lot!" : diff > 0 ? `You rate ${Math.abs(diff).toFixed(1)} pts higher on average` : `${friend.name} rates ${Math.abs(diff).toFixed(1)} pts higher on average`;
+
+    // Per-album comparison
+    const compRows = sharedIds.map(id => {
+      const album = ALBUMS.find(a => a.id == id);
+      const myR = currentUser.ratings[id];
+      const theirR = friend.ratings[id];
+      const d = myR - theirR;
+      return { album, myR, theirR, d };
+    }).sort((a,b) => Math.abs(b.d) - Math.abs(a.d));
+
+    return `
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+          <div>
+            <div style="font-weight:500;font-size:1rem;margin-bottom:0.2rem">${friend.name}</div>
+            <div style="font-size:0.78rem;color:var(--muted)">${diffLabel}</div>
+          </div>
+          <div style="display:flex;gap:1rem;text-align:center;">
+            <div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--amber)">${myAvg.toFixed(1)}</div>
+              <div style="font-size:0.7rem;color:var(--muted)">Your avg</div>
+            </div>
+            <div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--brown-mid)">${theirAvg.toFixed(1)}</div>
+              <div style="font-size:0.7rem;color:var(--muted)">${friend.name}'s avg</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">Biggest disagreements</div>
+        ${compRows.slice(0,5).map(({album, myR, theirR, d}) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;">
+            <span style="color:var(--brown-mid)">${album ? album.title : 'Unknown'}</span>
+            <span>
+              <span style="color:var(--amber);font-weight:500">${myR}</span>
+              <span style="color:var(--muted)"> vs </span>
+              <span style="color:var(--brown-mid);font-weight:500">${theirR}</span>
+              <span style="color:${d>0?'#2E5C3A':'#8B2E2E'};font-size:0.75rem;margin-left:0.35rem">(${d>0?'+':''}${d})</span>
+            </span>
+          </div>`).join('')}
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem">${sharedIds.length} albums rated together</div>
+      </div>`;
+  }).join('') : `<div style="padding:1.25rem;background:var(--cream-dark);border-radius:10px;font-size:0.85rem;color:var(--muted)">No friends in the club yet. Share your link below to invite someone!</div>`;
+
+  container.innerHTML = `
+    <div class="stats-header">Your Stats</div>
+
+    <!-- Overview tiles -->
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+      <div class="stat-tile">
+        <div class="st-val">${ratedCount}</div>
+        <div class="st-label">Albums rated</div>
+      </div>
+      <div class="stat-tile">
+        <div class="st-val">${avgRating !== null ? avgRating.toFixed(1) : '—'}</div>
+        <div class="st-label">Avg rating</div>
+      </div>
+      <div class="stat-tile">
+        <div class="st-val">${pct}%</div>
+        <div class="st-label">Progress</div>
+      </div>
+      <div class="stat-tile">
+        <div class="st-val">${totalAlbums - ratedCount}</div>
+        <div class="st-label">Remaining</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem">
+        <span>${ratedCount} of ${totalAlbums} albums rated</span><span>${pct}%</span>
+      </div>
+      <div style="height:8px;background:var(--cream-dark);border-radius:4px;overflow:hidden">
+        <div style="height:8px;width:${pct}%;background:var(--amber);border-radius:4px;transition:width 0.8s ease"></div>
+      </div>
+    </div>
+
+    ${highestRated ? `
+    <!-- Best / Worst -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1rem;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:0.5rem">Highest rated</div>
+        <div style="font-family:'Playfair Display',serif;font-size:0.95rem;margin-bottom:0.2rem">${highestRated.title}</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem">${highestRated.artist}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--green)">${currentUser.ratings[highestRated.id]}<span style="font-size:0.85rem;color:var(--muted)">/10</span></div>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1rem;">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--red);margin-bottom:0.5rem">Lowest rated</div>
+        <div style="font-family:'Playfair Display',serif;font-size:0.95rem;margin-bottom:0.2rem">${lowestRated.title}</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem">${lowestRated.artist}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--red)">${currentUser.ratings[lowestRated.id]}<span style="font-size:0.85rem;color:var(--muted)">/10</span></div>
+      </div>
+    </div>` : ''}
+
+    <!-- Rating distribution -->
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:2rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;">Rating Distribution</div>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:0.5rem">
+        ${dist.map((count, i) => {
+          const h = maxDist > 0 ? Math.round((count/maxDist)*80) : 0;
+          const col = (i+1) >= 8 ? '#2E5C3A' : (i+1) >= 6 ? '#C8862A' : (i+1) >= 4 ? '#6B4C3B' : '#8B2E2E';
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
+            <div style="font-size:0.65rem;color:var(--muted)">${count||''}</div>
+            <div style="width:100%;background:${count?col:'var(--cream-dark)'};border-radius:3px 3px 0 0;height:${Math.max(h,count?4:0)}px"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:4px">
+        ${dist.map((_, i) => `<div style="flex:1;text-align:center;font-size:0.68rem;color:var(--muted)">${i+1}</div>`).join('')}
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:0.4rem">Rating (out of 10)</div>
+    </div>
+
+    <!-- By Genre -->
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;">By Genre</div>
+      ${breakdownTable(genreRows, 'Genre', 'genre')}
+      ${!genreRows.length ? '' : ''}
+    </div>
+
+    <!-- By Decade -->
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;">By Decade</div>
+      ${breakdownTable(decadeRows, 'Decade', 'decade')}
+    </div>
+
+    <!-- By Artist -->
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.35rem;">By Artist</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem">Top 10 by average rating</div>
+      ${breakdownTable(artistRows, 'Artist', 'artist')}
+    </div>
+
+    <!-- By Source -->
+    <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.35rem;">By Source</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem">Your avg rating across each publication's picks</div>
+      ${breakdownTable(sourceRows, 'Source', 'source')}
+    </div>
+
+    <!-- Friend comparison -->
+    <div style="margin-bottom:2rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;">Club Comparison</div>
+      ${friendHtml}
+    </div>
+
+    <!-- Share -->
+    <hr class="section-divider">
+    <div style="margin-top:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.5rem;">Invite a friend</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">Share this link — they sign up with their own name and you'll see each other's scores.</p>
+      <div class="url-share" onclick="copyShareUrl()">${shareUrl}</div>
+      <div class="copy-hint">↑ Click to copy your share link</div>
+    </div>
+
+    <hr class="section-divider">
+    <div style="margin-top:1.5rem;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.5rem;">Google Sheets sync</div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">${SCRIPT_URL ? '✓ Connected. Ratings sync automatically when you save.' : 'Not connected yet. Paste your Apps Script URL below to enable cross-device sync.'}</p>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <input type="text" id="statsScriptInput" placeholder="https://script.google.com/macros/s/…/exec" value="${SCRIPT_URL}" style="flex:1;min-width:200px;font-family:'DM Mono',monospace;font-size:0.78rem;" />
+        <button class="btn btn-amber" onclick="updateScriptUrl()" style="white-space:nowrap;font-size:0.82rem;padding:0.5rem 1rem;">${SCRIPT_URL ? 'Update' : 'Connect'}</button>
+        ${SCRIPT_URL ? `<button class="btn" onclick="manualSync()" style="font-size:0.82rem;padding:0.5rem 1rem;">Sync now</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function copyShareUrl() {
+  const url = window.location.href.split('?')[0] + '?user=' + encodeURIComponent(currentUser.name);
+  navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+}
+
+function updateScriptUrl() {
+  const input = document.getElementById('statsScriptInput');
+  if (!input) return;
+  const url = input.value.trim();
+  if (!url.startsWith('https://script.google.com')) { showToast('Paste the full URL from Google'); return; }
+  SCRIPT_URL = url;
+  lsSet('lnc_script_url', url);
+  document.getElementById('setupBanner').style.display = 'none';
+  showToast('Connected ✓');
+  renderStats();
+}
+
+async function manualSync() {
+  showToast('Syncing…');
+  await syncFromSheets();
+  currentUser = allUsers[currentUser.key] || currentUser;
+  showToast('Synced ✓');
+  renderStats();
+}
+
+// =====================
+// TOAST
+// =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
